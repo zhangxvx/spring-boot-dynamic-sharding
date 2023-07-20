@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    dynamic:
+      primary: master #设置默认的数据源或者数据源组,默认值即为master
+      strict: false #严格匹配数据源,默认false. true未匹配到指定数据源时抛异常,false使用默认数据源
+      datasource:
+        master:
+          url: jdbc:mysql://192.168.189.130:3306/java_db
+          username: root
+          password: 123456
+          driver-class-name: com.mysql.cj.jdbc.Driver # 3.2.0开始支持SPI可省略此配置
+
+  shardingsphere:
+    datasource:
+      names: ds0,ds1
+      ds0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        #配置主库地址
+        jdbc-url: jdbc:mysql://192.168.189.130:3306/ds0?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai
+        username: root
+        password: 123456
+      ds1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        #配置从库地址
+        jdbc-url: jdbc:mysql://192.168.189.130:3306/ds1?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai
+        username: root
+        password: 123456
+    rules:
+      sharding:
+        tables:
+          t_config:
+            actual-data-nodes: ds0.t_config_$->{1..2}
+          apply_log:
+            actual-data-nodes: ds$->{0..1}.apply_log
+
+    props:
+      sql-show: true
